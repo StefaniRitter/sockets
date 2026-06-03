@@ -58,7 +58,13 @@ A imagem abaixo mostra 4 terminais diferentes, onde o primeiro é o servidor, e 
 <img width="1645" height="657" alt="image" src="https://github.com/user-attachments/assets/eff7e195-f7f3-45f2-b082-0c410ab990e4" />
 
 
+Resolver:
 
+* Faz sentido enviar as mensagens anteriores para os novos usuários?
+* Fechar conexão nas portas para evitar erros e threads fantasmas;
+* Criar funções para conversas privadas entre dois usuários;
+* Criar funções para múltiplos grupos;
+* Refatorar código e lógica.
 
 
 
