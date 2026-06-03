@@ -2,7 +2,7 @@ import socket, threading, time
 
 # declarando IP e porta para o servidor
 HOST = '127.0.0.1'
-PORT = 50000
+PORT = 50005
 
 conexoes = []
 mensagens = []
@@ -21,8 +21,8 @@ ESSAS FUNÇÕES SEMPRE VÃO MANDAR MENSAGEM PARA TODOS OS USUÁRIOS!
 def enviar_mensagem_individual(conexao):
     print(f'[ENVIANDO] Enviando mensagens para {conexao['addr']}')
     for i in range(conexao['last'], len(mensagens)):
-        mensagem_envio = 'msg=' + mensagens[i]
-        conexao['addr'].send(mensagem_envio)
+        mensagem_envio = 'AQUI=' + mensagens[i]
+        conexao['conn'].send(mensagem_envio.encode())
         conexao['last'] = i + 1
 
         # evita mandar as mensagens mais rápido do que recebe
@@ -62,7 +62,7 @@ def handle_clientes(conn, addr):
 
             elif msg.startswith('msg='):
                 msg_separada = msg.split("=")
-                mensagem = msg_separada[1]
+                mensagem = nome + '=' + msg_separada[1]
                 mensagens.append(mensagem)
                 enviar_mensagem_todos(conn)
 
@@ -79,3 +79,5 @@ def start():
         # a thread criada vai chamar a função handle_clientes com os parâmetros conn e addr
         thread = threading.Thread(target=handle_clientes, args=(conn, addr))
         thread.start()
+
+start()
