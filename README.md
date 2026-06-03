@@ -1,4 +1,4 @@
-# Aplicação para troca de mensagens com sockets;
+# Aplicação para troca de mensagens com sockets
 
 ## Visão Geral
 
@@ -54,6 +54,8 @@ Digite seu nome:
 
 
 A imagem abaixo mostra 4 terminais diferentes, onde o primeiro é o servidor, e os outros 3 são clientes. O objetivo dessa parte do programa é simular um grupo, onde toda e qualquer mensagem enviada vai para todos os clientes conectados no servidor, e quando um novo cliente faz uma conexão, ele recebe todas as mensagens enviadas anteriormente.
+
+<img width="1645" height="657" alt="image" src="https://github.com/user-attachments/assets/eff7e195-f7f3-45f2-b082-0c410ab990e4" />
 
 
 
