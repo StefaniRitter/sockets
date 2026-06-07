@@ -66,7 +66,33 @@ Resolver:
 * Criar funções para múltiplos grupos;
 * Refatorar código e lógica.
 
+### Alterações: 
+* Validação de nome único no login
+* Tratamento de desconexão de usuários
+* Criação de grupos
+* Entrada em grupos
+* Saída de grupos
+* Envio de mensagens para grupos
+* Criador entra automaticamente no grupo criado
+* Mensagens de sistema e erro
+* Logs de conexão, grupos e desconexão
+* Uso de Lock para evitar problemas entre threads
+* Identificação visual de mensagens:
+    * [GERAL]
+    * [nomegrupo]
+
+### Comandos do terminal: 
+* Mensagem global: oi pessoal
+* Criar grupo: /criar nomegrupo
+* Entrar em grupo: /entrar nomegrupo
+* Sair grupo: /sair nomegrupo
+* Enviar mensagem em grupo: /grupo nomegrupo oi
 
 
-
-
+### Falta fazer:
+* Mensagem privada
+* Listar grupos
+* Listar usuários online
+* Listar membros de um grupo
+* Persistência dos dados (usar JSON)
+* Interface gráfica
