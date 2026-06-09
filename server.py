@@ -207,6 +207,24 @@ def handle_clientes(conn, addr):
                         membros = ', '.join(grupos[nome_grupo])
                         conn.send(f'SISTEMA={nome_grupo} possui {len(grupos[nome_grupo])} membro(s): {membros}'.encode())
 
+            # Exibir comandos disponíveis
+            elif msg.startswith('ajuda='):
+                ajuda = (
+                    "\n=== COMANDOS DISPONÍVEIS ===\n"
+                    "/criar nomegrupo -> cria um grupo\n"
+                    "/entrar nomegrupo -> entra em um grupo\n"
+                    "/sair nomegrupo -> sai de um grupo\n"
+                    "/grupo nomegrupo mensagem -> envia mensagem para um grupo\n"
+                    "/privado destinatario mensagem -> envia mensagem privada\n"
+                    "/grupos -> lista todos os grupos\n"
+                    "/usuarios -> lista usuários online\n"
+                    "/membros nomegrupo -> lista membros de um grupo\n"
+                    "/ajuda -> exibe esta ajuda\n"
+                    "============================"
+                )
+
+                conn.send(f'SISTEMA={ajuda}'.encode())
+
             # Sair do grupo
             elif msg.startswith('sair_grupo='):
                 nome_grupo = msg.split('=')[1]

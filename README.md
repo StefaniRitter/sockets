@@ -99,7 +99,10 @@ Resolver:
 * Listar membros de um grupo
 * Persistência dos dados (usar JSON)
 * Interface gráfica
+* Remover grupos vazios?
+* Comando de ajuda 
 
 ### Alterações:
 * Mensagem privada entre usuários conectados
 * Listagens: grupos, usuários online, membros de um grupo
+* Comando de "ajuda" para exibir todos os comandos disponíveis

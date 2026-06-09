@@ -87,6 +87,9 @@ def enviar_mensagem():
         elif msg == '/usuarios':
             enviar('listar_usuarios=')
 
+        elif msg == '/ajuda':
+            enviar('ajuda=')
+
         elif msg.startswith('ERRO='):
             print(msg.split('=', 1)[1])
 
