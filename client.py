@@ -80,6 +80,9 @@ def enviar_mensagem():
 
             enviar(f'privado_msg={destinatario}|{texto}')
         
+        elif msg == '/usuarios':
+            enviar('listar_usuarios=')
+
         elif msg.startswith('ERRO='):
             print(msg.split('=', 1)[1])
 

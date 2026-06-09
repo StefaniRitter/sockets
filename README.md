@@ -89,6 +89,7 @@ Resolver:
 * Enviar mensagem em grupo: /grupo nomegrupo oi
 * Mensagem privada: /privado destinatario mensagem
 * Listar grupos: /grupos
+* Listar usuários online: /usuarios
 
 ### Falta fazer:
 * Mensagem privada
@@ -100,3 +101,4 @@ Resolver:
 
 ### Alterações:
 * Mensagem privada entre usuários conectados
+* Listagens: grupos, usuários conectados

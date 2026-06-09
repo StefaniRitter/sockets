@@ -183,6 +183,15 @@ def handle_clientes(conn, addr):
                         lista_grupos = ', '.join(grupos.keys())
                         conn.send(f'SISTEMA=Grupos disponíveis: {lista_grupos}'.encode())
 
+            # Listar usuários online
+            elif msg.startswith('listar_usuarios='):
+                with lock:
+                    if len(usuarios) == 0:
+                        conn.send('SISTEMA=Nenhum usuário online'.encode())
+                    else:
+                        lista_usuarios = ', '.join(usuarios.keys())
+                        conn.send(f'SISTEMA=Usuários online: {lista_usuarios}'.encode())
+
             # Sair do grupo
             elif msg.startswith('sair_grupo='):
                 nome_grupo = msg.split('=')[1]
