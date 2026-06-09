@@ -18,6 +18,9 @@ def handle_mensagens():
                 partes = msg.split('=', 2)
                 print(f'[{partes[1]}] {partes[2]}')
 
+            elif msg.startswith('PRIVADO='):
+                print(f'[privado] {msg.split("=", 1)[1]}')
+
             elif msg.startswith('ERRO='):
                 print(msg.split('=', 1)[1])
 
@@ -61,6 +64,18 @@ def enviar_mensagem():
             texto = partes[2]
 
             enviar(f'grupo_msg={grupo}|{texto}')
+        
+        elif msg.startswith('/privado '):
+            partes = msg.split(' ', 2)
+
+            if len(partes) < 3:
+                print('Uso: /privado nome_usuario mensagem')
+                continue
+
+            destinatario = partes[1]
+            texto = partes[2]
+
+            enviar(f'privado_msg={destinatario}|{texto}')
         
         elif msg.startswith('ERRO='):
             print(msg.split('=', 1)[1])

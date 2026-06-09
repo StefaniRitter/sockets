@@ -25,6 +25,7 @@ s.bind((HOST, PORT))
 ESSAS FUNÇÕES SEMPRE VÃO MANDAR MENSAGEM PARA TODOS OS USUÁRIOS!
 '''
 
+# refatorar
 def enviar_mensagem_individual(conexao):
     print(f"[ENVIANDO] Enviando mensagens para {conexao['addr']}")
     for i in range(conexao['last'], len(mensagens)):
@@ -45,6 +46,13 @@ def enviar_mensagem_grupo(grupo, remetente, texto):
     for membro in membros:
         if membro in usuarios:
             usuarios[membro].send(f'GRUPO={grupo}={remetente}: {texto}'.encode())
+
+def enviar_mensagem_privada(destinatario, remetente, texto):
+    if destinatario in usuarios:
+        usuarios[destinatario].send(f'PRIVADO={remetente}: {texto}'.encode())
+        usuarios[remetente].send(f'PRIVADO=Você para {destinatario}: {texto}'.encode())
+    else:
+        usuarios[remetente].send(f'SISTEMA=Usuário {destinatario} não está online'.encode())
 
 #  Cada cliente conectado ganha uma thread executando essa função
 def handle_clientes(conn, addr):
@@ -149,6 +157,23 @@ def handle_clientes(conn, addr):
                     enviar_mensagem_grupo(grupo,nome,texto)
                     print(f'[MSG GRUPO] {nome} -> {grupo}')
 
+            # Enviar mensagem privada
+            elif msg.startswith('privado_msg='):
+                conteudo = msg.split('=', 1)[1]
+
+                if '|' not in conteudo:
+                    conn.send('SISTEMA=Uso correto: /privado nome mensagem'.encode())
+                    continue
+
+                destinatario, texto = conteudo.split('|', 1)
+
+                if destinatario == nome:
+                    conn.send('SISTEMA=Você não pode enviar mensagem privada para você mesmo'.encode())
+
+                else:
+                    enviar_mensagem_privada(destinatario, nome, texto)
+                    print(f'[MSG PRIVADA] {nome} -> {destinatario}')
+
             # Sair do grupo
             elif msg.startswith('sair_grupo='):
                 nome_grupo = msg.split('=')[1]
@@ -190,7 +215,7 @@ def start():
         # quando acontece a conexão, salva o retorno da função, que é a conexão e o endereço que foi conectado
         conn, addr = s.accept()
 
-        # cria uma thread toda vez que entrar uma nova conexã
+        # cria uma thread toda vez que entrar uma nova conexão
         # a thread criada vai chamar a função handle_clientes com os parâmetros conn e addr
         thread = threading.Thread(target=handle_clientes, args=(conn, addr))
         thread.start()

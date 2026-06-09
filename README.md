@@ -96,3 +96,11 @@ Resolver:
 * Listar membros de um grupo
 * Persistência dos dados (usar JSON)
 * Interface gráfica
+
+### Alterações:
+* Mensagem Privada
+
+### Comandos do terminal: 
+* Mensagem privada: /privado destinatario mensagem
+Saída esperada para o REMETENTE -> [privado] Você para destinatário: mensagem
+Saída esperada para o DESTINATÁRIO: [privado] remetente: mensagem
