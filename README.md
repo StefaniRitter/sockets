@@ -87,12 +87,39 @@ Resolver:
 * Entrar em grupo: /entrar nomegrupo
 * Sair grupo: /sair nomegrupo
 * Enviar mensagem em grupo: /grupo nomegrupo oi
-
+* Mensagem privada: /privado destinatario mensagem
+* Listar grupos: /grupos
+* Listar usuários online: /usuarios
+* Listar membros de um grupo: /membros nomegrupo
 
 ### Falta fazer:
-* Mensagem privada
-* Listar grupos
-* Listar usuários online
-* Listar membros de um grupo
-* Persistência dos dados (usar JSON)
+* Mensagem privada ✅
+* Listar grupos ✅
+* Listar usuários online ✅
+* Listar membros de um grupo ✅
+* Persistência dos dados (usar JSON) ✅
 * Interface gráfica
+* Remover grupos vazios?
+* Melhorar tratamento de erros
+* Comando de ajuda ✅
+
+### Alterações:
+* Mensagem privada entre usuários conectados
+* Listagens: grupos, usuários online, membros de um grupo
+* Comando de "ajuda" para exibir ao usuário todos os comandos disponíveis
+* Persistência de dados com JSON
+* Salvamento de usuários com status online/offline
+* Salvamento dos grupos criados e seus membros
+* Carregamento automático dos dados ao iniciar o servidor
+
+### Persistência de dados
+
+A aplicação utiliza um arquivo `dados.json` para armazenar informações que devem continuar disponíveis mesmo após o servidor ser encerrado.
+
+Atualmente, são salvos:
+
+* Usuários já registrados, com status `online` ou `offline`;
+* Grupos criados;
+* Membros de cada grupo.
+
+Ao iniciar o servidor, os dados são carregados automaticamente. Todos os usuários são definidos inicialmente como `offline`, pois conexões anteriores não permanecem válidas após reiniciar o servidor.

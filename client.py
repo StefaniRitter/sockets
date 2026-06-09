@@ -1,4 +1,4 @@
-import socket, threading, time
+import socket, threading
 
 SERVER = '127.0.0.1'
 PORT = 50005
@@ -17,6 +17,9 @@ def handle_mensagens():
             elif msg.startswith('GRUPO='):
                 partes = msg.split('=', 2)
                 print(f'[{partes[1]}] {partes[2]}')
+
+            elif msg.startswith('PRIVADO='):
+                print(f'[privado] {msg.split("=", 1)[1]}')
 
             elif msg.startswith('ERRO='):
                 print(msg.split('=', 1)[1])
@@ -62,6 +65,36 @@ def enviar_mensagem():
 
             enviar(f'grupo_msg={grupo}|{texto}')
         
+        elif msg.startswith('/membros '):
+            grupo = msg.split(' ', 1)[1].strip()
+
+            if not grupo:
+                print('Uso: /membros nome_grupo')
+                continue
+
+            enviar(f'listar_membros={grupo}')
+
+        elif msg == '/grupos':
+            enviar('listar_grupos=')
+
+        elif msg.startswith('/privado '):
+            partes = msg.split(' ', 2)
+
+            if len(partes) < 3:
+                print('Uso: /privado nome_usuario mensagem')
+                continue
+
+            destinatario = partes[1]
+            texto = partes[2]
+
+            enviar(f'privado_msg={destinatario}|{texto}')
+        
+        elif msg == '/usuarios':
+            enviar('listar_usuarios=')
+
+        elif msg == '/ajuda':
+            enviar('ajuda=')
+
         elif msg.startswith('ERRO='):
             print(msg.split('=', 1)[1])
 

@@ -1,15 +1,18 @@
-import socket, threading, time
+import socket, threading, time, json, os
+
+# arquivo utilizado para persistência dos dados
+ARQUIVO_DADOS = 'dados.json'
 
 # declarando IP e porta para o servidor
 HOST = '127.0.0.1'
 PORT = 50005
 
-
 # Estruturas globais
 conexoes = []  # clientes conectados
 mensagens = []  # msg globais
- 
-usuarios = {}   # nome -> conexão
+
+usuarios = {}        # nome -> {"status": "online/offline"}
+usuarios_online = {} # nome -> conexão
 grupos = {}     # grupo -> membros
 
 lock = threading.Lock()   # evita concorrência entre threads
@@ -19,7 +22,6 @@ s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
 # define IP e porta em que o servidor vai escutar
 s.bind((HOST, PORT))
-
 
 '''
 ESSAS FUNÇÕES SEMPRE VÃO MANDAR MENSAGEM PARA TODOS OS USUÁRIOS!
@@ -43,14 +45,49 @@ def enviar_mensagem_todos(conn):
 def enviar_mensagem_grupo(grupo, remetente, texto):
     membros = grupos[grupo]
     for membro in membros:
-        if membro in usuarios:
-            usuarios[membro].send(f'GRUPO={grupo}={remetente}: {texto}'.encode())
+        if membro in usuarios_online:
+            usuarios_online[membro].send(f'GRUPO={grupo}={remetente}: {texto}'.encode())
+
+def enviar_mensagem_privada(destinatario, remetente, texto):
+    if destinatario in usuarios_online:
+        usuarios_online[destinatario].send(f'PRIVADO={remetente}: {texto}'.encode())
+        usuarios_online[remetente].send(f'PRIVADO=Você para {destinatario}: {texto}'.encode())
+    else:
+        usuarios_online[remetente].send(f'SISTEMA=Usuário {destinatario} não está online'.encode())
+
+# Recupera usuários e grupos salvos em JSON
+def carregar_dados():
+    global usuarios, grupos
+
+    if not os.path.exists(ARQUIVO_DADOS):
+        usuarios = {}
+        grupos = {}
+        return
+
+    with open(ARQUIVO_DADOS, 'r', encoding='utf-8') as arquivo:
+        dados = json.load(arquivo)
+
+    usuarios = dados.get('usuarios', {})
+    grupos = dados.get('grupos', {})
+
+    # quando o servidor reinicia todos os usuários ficam offline
+    for nome in usuarios:
+        usuarios[nome]['status'] = 'offline'
+
+# Salva o estado atual dos usuários e grupos em JSON
+def salvar_dados():
+    dados = {
+        'usuarios': usuarios,
+        'grupos': grupos
+    }
+
+    with open(ARQUIVO_DADOS, 'w', encoding='utf-8') as arquivo:
+        json.dump(dados, arquivo, indent=4, ensure_ascii=False)
 
 #  Cada cliente conectado ganha uma thread executando essa função
 def handle_clientes(conn, addr):
     print(f'[NOVA CONEXÃO] Um novo usuário se conectou pelo endereço {addr}!')
-    global conexoes
-    global mensagens
+    global conexoes,mensagens
     nome = False
 
     while True:
@@ -72,14 +109,16 @@ def handle_clientes(conn, addr):
                 
                 # Usa lock para evitar condição de corrida
                 with lock:
-                    # Valida nomes (nome deve ser único)
-                    if nome in usuarios:
+                    # Valida nomes (nome deve ser único) e verifica se o usuário já está online
+                    if nome in usuarios and usuarios[nome]['status'] == 'online':
                         print(f"Nome duplicado detectado: {nome}")
                         conn.send("ERRO=Nome já está em uso, digite outro nome!".encode())
                         continue
                     
-                    # Salva usuários na lista de usuários
-                    usuarios[nome] = conn
+                    # Registra o usuário, atualiza o status e salva a conexão para mensagens futuras
+                    usuarios[nome] = {"status": "online"}
+                    usuarios_online[nome] = conn
+                    salvar_dados()
 
                     # Envia ok confirmando cadastro
                     conn.send("OK=NOME".encode())
@@ -100,8 +139,8 @@ def handle_clientes(conn, addr):
 
             # Enviar msg 
             elif msg.startswith('msg='):
-                msg_separada = msg.split("=")
-                mensagem = nome + '=' + msg_separada[1]
+                texto = msg.split("=", 1)[1]
+                mensagem = nome + '=' + texto
                 mensagens.append(mensagem)
                 enviar_mensagem_todos(conn)
             
@@ -116,6 +155,8 @@ def handle_clientes(conn, addr):
                     else:
                         grupos[nome_grupo] = []
                         grupos[nome_grupo].append(nome)
+                        salvar_dados()
+
                         conn.send(f'SISTEMA=Grupo {nome_grupo} criado e você entrou nele'.encode())
 
                         print(f'[GRUPO] Criado: {nome_grupo}')   
@@ -130,6 +171,8 @@ def handle_clientes(conn, addr):
 
                     elif nome not in grupos[nome_grupo]:
                         grupos[nome_grupo].append(nome)
+                        salvar_dados()
+
                         conn.send(f'SISTEMA=Entrou em {nome_grupo}'.encode())
 
                         print( f'[GRUPO] {nome} entrou em {nome_grupo}')
@@ -149,6 +192,74 @@ def handle_clientes(conn, addr):
                     enviar_mensagem_grupo(grupo,nome,texto)
                     print(f'[MSG GRUPO] {nome} -> {grupo}')
 
+            # Enviar mensagem privada
+            elif msg.startswith('privado_msg='):
+                conteudo = msg.split('=', 1)[1]
+
+                if '|' not in conteudo:
+                    conn.send('SISTEMA=Uso correto: /privado nome mensagem'.encode())
+                    continue
+
+                destinatario, texto = conteudo.split('|', 1)
+
+                if destinatario == nome:
+                    conn.send('SISTEMA=Você não pode enviar mensagem privada para você mesmo'.encode())
+
+                else:
+                    enviar_mensagem_privada(destinatario, nome, texto)
+                    print(f'[MSG PRIVADA] {nome} -> {destinatario}')
+
+            # Listar grupos
+            elif msg.startswith('listar_grupos='):
+                with lock:
+                    if len(grupos) == 0:
+                        conn.send('SISTEMA=Nenhum grupo criado ainda'.encode())
+                    else:
+                        lista_grupos = ', '.join(grupos.keys())
+                        conn.send(f'SISTEMA=Grupos disponíveis: {lista_grupos}'.encode())
+
+            # Listar usuários online
+            elif msg.startswith('listar_usuarios='):
+                with lock:
+                    lista_usuarios = ', '.join(usuarios_online.keys())
+                    if lista_usuarios:
+                        conn.send(f'SISTEMA=Usuários online: {lista_usuarios}'.encode())
+                    else:
+                            conn.send('SISTEMA=Nenhum usuário online'.encode())
+
+            # Listar membros de um grupo
+            elif msg.startswith('listar_membros='):
+                nome_grupo = msg.split('=', 1)[1]
+
+                with lock:
+                    if nome_grupo not in grupos:
+                        conn.send('SISTEMA=Grupo não existe'.encode())
+
+                    elif len(grupos[nome_grupo]) == 0:
+                        conn.send(f'SISTEMA=O grupo {nome_grupo} não possui membros'.encode())
+
+                    else:
+                        membros = ', '.join(grupos[nome_grupo])
+                        conn.send(f'SISTEMA={nome_grupo} possui {len(grupos[nome_grupo])} membro(s): {membros}'.encode())
+
+            # Exibir comandos disponíveis
+            elif msg.startswith('ajuda='):
+                ajuda = (
+                    "\n=== COMANDOS DISPONÍVEIS ===\n"
+                    "/criar nomegrupo -> cria um grupo\n"
+                    "/entrar nomegrupo -> entra em um grupo\n"
+                    "/sair nomegrupo -> sai de um grupo\n"
+                    "/grupo nomegrupo mensagem -> envia mensagem para um grupo\n"
+                    "/privado destinatario mensagem -> envia mensagem privada\n"
+                    "/grupos -> lista todos os grupos\n"
+                    "/usuarios -> lista usuários online\n"
+                    "/membros nomegrupo -> lista membros de um grupo\n"
+                    "/ajuda -> exibe esta ajuda\n"
+                    "============================"
+                )
+
+                conn.send(f'SISTEMA={ajuda}'.encode())
+
             # Sair do grupo
             elif msg.startswith('sair_grupo='):
                 nome_grupo = msg.split('=')[1]
@@ -157,26 +268,28 @@ def handle_clientes(conn, addr):
                     if nome_grupo in grupos:
                         if nome in grupos[nome_grupo]:
                             grupos[nome_grupo].remove(nome)
+                            salvar_dados()
+
                             conn.send(f'SISTEMA=Saiu de {nome_grupo}'.encode())
 
                             print(f'[GRUPO] {nome} saiu de {nome_grupo}')
             
 
 # Desconexões
+# Usuário desconectado: status offline, sem remover participação em grupos
 def remover_usuario(nome, conn):
-    global conexoes
-    global usuarios
-    global grupos
+    global conexoes, usuarios, usuarios_online
 
     with lock:
         if nome in usuarios:
-            del usuarios[nome]
+            usuarios[nome]["status"] = "offline"
+
+        if nome in usuarios_online:
+            del usuarios_online[nome]
 
         conexoes = [c for c in conexoes if c["conn"] != conn]
 
-        for grupo in grupos.values():
-            if nome in grupo:
-                grupo.remove(nome)
+        salvar_dados()
 
     print(f'[DESCONECTADO] {nome}')
 
@@ -190,9 +303,10 @@ def start():
         # quando acontece a conexão, salva o retorno da função, que é a conexão e o endereço que foi conectado
         conn, addr = s.accept()
 
-        # cria uma thread toda vez que entrar uma nova conexã
+        # cria uma thread toda vez que entrar uma nova conexão
         # a thread criada vai chamar a função handle_clientes com os parâmetros conn e addr
         thread = threading.Thread(target=handle_clientes, args=(conn, addr))
         thread.start()
 
+carregar_dados()
 start()

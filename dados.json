@@ -1,0 +1,24 @@
+{
+    "usuarios": {
+        "nella": {
+            "status": "offline"
+        },
+        "ste": {
+            "status": "offline"
+        },
+        "vick": {
+            "status": "offline"
+        }
+    },
+    "grupos": {
+        "redes": [
+            "nella",
+            "vick",
+            "ste"
+        ],
+        "trabalho": [
+            "nella",
+            "vick"
+        ]
+    }
+}
