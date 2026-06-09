@@ -174,6 +174,15 @@ def handle_clientes(conn, addr):
                     enviar_mensagem_privada(destinatario, nome, texto)
                     print(f'[MSG PRIVADA] {nome} -> {destinatario}')
 
+            # Listar grupos
+            elif msg.startswith('listar_grupos='):
+                with lock:
+                    if len(grupos) == 0:
+                        conn.send('SISTEMA=Nenhum grupo criado ainda'.encode())
+                    else:
+                        lista_grupos = ', '.join(grupos.keys())
+                        conn.send(f'SISTEMA=Grupos disponíveis: {lista_grupos}'.encode())
+
             # Sair do grupo
             elif msg.startswith('sair_grupo='):
                 nome_grupo = msg.split('=')[1]

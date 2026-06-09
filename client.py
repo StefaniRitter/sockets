@@ -65,6 +65,9 @@ def enviar_mensagem():
 
             enviar(f'grupo_msg={grupo}|{texto}')
         
+        elif msg == '/grupos':
+            enviar('listar_grupos=')
+
         elif msg.startswith('/privado '):
             partes = msg.split(' ', 2)
 

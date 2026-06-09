@@ -87,7 +87,8 @@ Resolver:
 * Entrar em grupo: /entrar nomegrupo
 * Sair grupo: /sair nomegrupo
 * Enviar mensagem em grupo: /grupo nomegrupo oi
-
+* Mensagem privada: /privado destinatario mensagem
+* Listar grupos: /grupos
 
 ### Falta fazer:
 * Mensagem privada
@@ -98,9 +99,4 @@ Resolver:
 * Interface gráfica
 
 ### Alterações:
-* Mensagem Privada
-
-### Comandos do terminal: 
-* Mensagem privada: /privado destinatario mensagem
-Saída esperada para o REMETENTE -> [privado] Você para destinatário: mensagem
-Saída esperada para o DESTINATÁRIO: [privado] remetente: mensagem
+* Mensagem privada entre usuários conectados
