@@ -65,6 +65,10 @@ def enviar_mensagem():
 
             enviar(f'grupo_msg={grupo}|{texto}')
         
+        elif msg.startswith('/membros '):
+            grupo = msg.split(' ', 1)[1]
+            enviar(f'listar_membros={grupo}')
+
         elif msg == '/grupos':
             enviar('listar_grupos=')
 
