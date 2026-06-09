@@ -105,6 +105,8 @@ Resolver:
 
 ### Alterações:
 * Mensagem privada entre usuários conectados
+* Confirmação de envio para o remetente
+* Exibição da mensagem para o destinatário
 * Listagens: grupos, usuários online, membros de um grupo
 * Comando de "ajuda" para exibir ao usuário todos os comandos disponíveis
 * Persistência de dados com JSON
@@ -123,3 +125,17 @@ Atualmente, são salvos:
 * Membros de cada grupo.
 
 Ao iniciar o servidor, os dados são carregados automaticamente. Todos os usuários são definidos inicialmente como `offline`, pois conexões anteriores não permanecem válidas após reiniciar o servidor.
+
+## Interface Gráfica
+
+Além da versão em terminal, a aplicação também possui uma interface gráfica desenvolvida com a biblioteca Tkinter. A interface oferece uma tela de login para validação do nome do usuário e uma janela principal de chat para envio e recebimento de mensagens.
+
+A versão gráfica utiliza a mesma comunicação baseada em sockets da versão em terminal, mantendo compatibilidade com todas as funcionalidades implementadas no servidor. O objetivo é proporcionar uma experiência mais intuitiva e amigável ao usuário, sem alterar a lógica de comunicação da aplicação.
+
+Para executar a interface gráfica:
+
+```bash
+python3 gui_client.py
+
+```md
+> A interface gráfica está em desenvolvimento e novas funcionalidades serão adicionadas gradualmente.
