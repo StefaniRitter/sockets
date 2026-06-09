@@ -1,7 +1,6 @@
 import socket, threading
 import tkinter as tk                     
 from tkinter import scrolledtext, ttk
-
 SERVER = '127.0.0.1'
 PORT = 50005
 
@@ -41,12 +40,11 @@ def abrir_janela_chat():
     # Configurações da janela
     janela_chat = tk.Tk()
     janela_chat.title("Chat com Sockets")
-    janela_chat.geometry("550x500")
     janela_chat.configure(bg="#f5f7fa")
 
     # Centralizar a janela na tela
-    largura = 550
-    altura = 500
+    largura = 650
+    altura = 600
 
     largura_tela = janela_chat.winfo_screenwidth()
     altura_tela = janela_chat.winfo_screenheight()
@@ -66,8 +64,11 @@ def abrir_janela_chat():
     area_mensagens.config(state='disabled')
 
     # Campo de entrada de mensagens
-    entrada_mensagem = tk.Entry(janela_chat, fg="gray")
-    entrada_mensagem.pack(padx=10, pady=5, fill=tk.X)
+    frame_envio = tk.Frame(janela_chat, bg="#f5f7fa")
+    frame_envio.pack(fill=tk.X, padx=10, pady=5)
+
+    entrada_mensagem = tk.Entry(frame_envio, fg="gray")
+    entrada_mensagem.pack(side=tk.LEFT, fill=tk.X, expand=True)
     configurar_placeholder(entrada_mensagem, "Digite sua mensagem")
 
     def mostrar_mensagem(texto):
@@ -117,9 +118,162 @@ def abrir_janela_chat():
         restaurar_placeholder(entrada_mensagem, "Digite sua mensagem")
 
     # Botão de enviar mensagem, return faz a tecla enter enviar a mensagem também
-    botao_enviar = ttk.Button(janela_chat, text="Enviar", command=enviar_mensagem)
-    botao_enviar.pack(pady=5)
+    botao_enviar = ttk.Button(frame_envio, text="Enviar", command=enviar_mensagem)
+    botao_enviar.pack(side=tk.LEFT, padx=(5, 0))
     entrada_mensagem.bind("<Return>", lambda event: enviar_mensagem())
+
+    # Frame para agrupar os botões dos comandos
+    frame_comandos = tk.Frame(janela_chat, bg="#f5f7fa")
+    frame_comandos.pack(fill=tk.X, padx=10, pady=(0, 10))
+
+    def criar_grupo():
+        janela_grupo = tk.Toplevel(janela_chat)
+        janela_grupo.title("Criar Grupo")
+
+        largura = 300
+        altura = 150
+
+        largura_tela = janela_grupo.winfo_screenwidth()
+        altura_tela = janela_grupo.winfo_screenheight()
+
+        x = (largura_tela // 2) - (largura // 2)
+        y = (altura_tela // 2) - (altura // 2)
+
+        janela_grupo.geometry(f"{largura}x{altura}+{x}+{y}")
+
+        janela_grupo.resizable(False, False)
+        janela_grupo.configure(bg="#f5f7fa")
+
+        # Impede que a janela principal seja usada enquanto esta estiver aberta
+        janela_grupo.grab_set()
+
+        # Título da janelinha
+        titulo = tk.Label(
+            janela_grupo,
+            text="Criar novo grupo",
+            font=("Arial", 12, "bold"),
+            bg="#f5f7fa",
+            fg="#1f2937"
+        )
+        titulo.pack(pady=(15, 8))
+
+        # Campo para digitar o nome do grupo
+        entrada_grupo = tk.Entry(
+            janela_grupo,
+            fg="gray",
+            justify="center"
+        )
+        entrada_grupo.pack(padx=25, fill=tk.X, ipady=4)
+
+        configurar_placeholder(entrada_grupo, "Nome do grupo")
+
+        def confirmar_criacao():
+            nome_grupo = entrada_grupo.get().strip()
+
+            if nome_grupo == "" or nome_grupo == "Nome do grupo":
+                mostrar_erro_no_input(entrada_grupo, "Informe o nome do grupo")
+                return
+
+            enviar(f'criar_grupo={nome_grupo}')
+            janela_grupo.destroy()
+
+        botao_confirmar = ttk.Button(
+            janela_grupo,
+            text="Criar",
+            command=confirmar_criacao
+        )
+        botao_confirmar.pack(pady=10)
+
+        entrada_grupo.bind("<Return>", lambda event: confirmar_criacao())
+
+    botao_criar = ttk.Button(frame_comandos, text="Criar Grupo", command=criar_grupo)
+    botao_criar.pack(side=tk.LEFT, padx=3)
+
+    def enviar_mensagem_grupo():
+        janela_grupo = tk.Toplevel(janela_chat)
+        janela_grupo.title("Enviar mensagem para grupo")
+        janela_grupo.resizable(False, False)
+        janela_grupo.configure(bg="#f5f7fa")
+
+        largura = 350
+        altura = 180
+
+        largura_tela = janela_grupo.winfo_screenwidth()
+        altura_tela = janela_grupo.winfo_screenheight()
+
+        x = (largura_tela // 2) - (largura // 2)
+        y = (altura_tela // 2) - (altura // 2)
+
+        janela_grupo.geometry(f"{largura}x{altura}+{x}+{y}")
+
+        janela_grupo.grab_set()
+
+        titulo = tk.Label(
+            janela_grupo,
+            text="Enviar mensagem para grupo",
+            font=("Arial", 12, "bold"),
+            bg="#f5f7fa",
+            fg="#1f2937"
+        )
+        titulo.pack(pady=(15, 8))
+
+        entrada_grupo = tk.Entry(
+            janela_grupo,
+            fg="gray",
+            justify="center"
+        )
+        entrada_grupo.pack(padx=25, fill=tk.X, ipady=4)
+        configurar_placeholder(entrada_grupo, "Nome do grupo")
+
+        entrada_texto = tk.Entry(
+            janela_grupo,
+            fg="gray",
+            justify="center"
+        )
+        entrada_texto.pack(padx=25, pady=(8, 0), fill=tk.X, ipady=4)
+        configurar_placeholder(entrada_texto, "Mensagem")
+
+        def confirmar_envio():
+            nome_grupo = entrada_grupo.get().strip()
+            texto = entrada_texto.get().strip()
+
+            if nome_grupo == "" or nome_grupo == "Nome do grupo":
+                mostrar_erro_no_input(entrada_grupo, "Informe o grupo")
+                return
+
+            if texto == "" or texto == "Mensagem":
+                mostrar_erro_no_input(entrada_texto, "Informe a mensagem")
+                return
+
+            enviar(f'grupo_msg={nome_grupo}|{texto}')
+            janela_grupo.destroy()
+
+        botao_confirmar = ttk.Button(
+            janela_grupo,
+            text="Enviar",
+            command=confirmar_envio
+        )
+        botao_confirmar.pack(pady=12)
+
+        entrada_texto.bind("<Return>", lambda event: confirmar_envio())
+
+    botao_msg_grupo = ttk.Button(frame_comandos, text="Mensagem Grupo", command=enviar_mensagem_grupo)
+    botao_msg_grupo.pack(side=tk.LEFT, padx=3)
+
+    botao_entrar = ttk.Button(frame_comandos, text="Entrar")
+    botao_entrar.pack(side=tk.LEFT, padx=3)
+
+    botao_sair = ttk.Button(frame_comandos, text="Sair")
+    botao_sair.pack(side=tk.LEFT, padx=3)
+
+    botao_grupos = ttk.Button(frame_comandos, text="Grupos")
+    botao_grupos.pack(side=tk.LEFT, padx=3)
+
+    botao_usuarios = ttk.Button(frame_comandos, text="Usuários")
+    botao_usuarios.pack(side=tk.LEFT, padx=3)
+
+    botao_ajuda = ttk.Button(frame_comandos, text="Ajuda")
+    botao_ajuda.pack(side=tk.LEFT, padx=3)
 
     # Inicia uma thread para ouvir mensagens do servidor em segundo plano
     thread = threading.Thread(target=receber_mensagens, daemon=True)

@@ -107,7 +107,9 @@ Resolver:
 * Mensagem privada entre usuários conectados
 * Confirmação de envio para o remetente
 * Exibição da mensagem para o destinatário
-* Listagens: grupos, usuários online, membros de um grupo
+* Listar grupos 
+* Listar usuários online 
+* Listar membros de um grupo 
 * Comando de "ajuda" para exibir ao usuário todos os comandos disponíveis
 * Persistência de dados com JSON
 * Salvamento de usuários com status online/offline
