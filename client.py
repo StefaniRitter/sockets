@@ -1,4 +1,4 @@
-import socket, threading, time
+import socket, threading
 
 SERVER = '127.0.0.1'
 PORT = 50005
@@ -66,7 +66,12 @@ def enviar_mensagem():
             enviar(f'grupo_msg={grupo}|{texto}')
         
         elif msg.startswith('/membros '):
-            grupo = msg.split(' ', 1)[1]
+            grupo = msg.split(' ', 1)[1].strip()
+
+            if not grupo:
+                print('Uso: /membros nome_grupo')
+                continue
+
             enviar(f'listar_membros={grupo}')
 
         elif msg == '/grupos':
