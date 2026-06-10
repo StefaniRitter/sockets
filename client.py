@@ -3,6 +3,7 @@ import threading
 import os
 import sys
 
+# IP e porta para o client
 SERVER = '127.0.0.1'
 PORT = 50005
 
@@ -14,6 +15,7 @@ except Exception as e:
     print(f"[ERRO] Não foi possível conectar ao servidor: {e}")
     sys.exit(1)
 
+# Função para escutar e processar mensagens recebidas do servidor
 def handle_mensagens():
     while True:
         try:
@@ -45,6 +47,7 @@ def handle_mensagens():
         except Exception:
             break
 
+# Função auxiliar para o envio de mensagens codificadas ao servidor
 def enviar(mensagem):
     try:
         client.send(mensagem.encode('utf-8'))
@@ -52,6 +55,7 @@ def enviar(mensagem):
         print("[SISTEMA] Falha ao enviar dados, conexão perdida.")
         os._exit(0)
 
+# Função para gerenciar loop de entrada do usuário e processamento de comandos
 def enviar_mensagem():
     print("Digite /ajuda para ver os comandos.")
     while True:
@@ -99,6 +103,7 @@ def enviar_mensagem():
         else:
             enviar(f'msg={msg}')
 
+# Autenticação do usuário antes de liberar o chat
 def validar_nome():
     while True:
         try:
@@ -121,9 +126,12 @@ def validar_nome():
             print("[SISTEMA] Erro de comunicação durante a autenticação.")
             os._exit(1)
 
+
 if __name__ == '__main__':
 
     validar_nome()
+
+    # Inicia a thread para receber mensagens em segundo plano, sem bloquear a entrada do usuário
     thread_receber = threading.Thread(target=handle_mensagens, daemon=True)
     thread_receber.start()
     enviar_mensagem()
