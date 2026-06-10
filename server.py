@@ -5,7 +5,7 @@ ARQUIVO_DADOS = 'dados.json'
 
 # declarando IP e porta para o servidor
 HOST = '127.0.0.1'
-PORT = 50005
+PORT = 50006
 
 # Estruturas globais
 conexoes = []  # clientes conectados
@@ -22,10 +22,6 @@ s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
 # define IP e porta em que o servidor vai escutar
 s.bind((HOST, PORT))
-
-'''
-ESSAS FUNÇÕES SEMPRE VÃO MANDAR MENSAGEM PARA TODOS OS USUÁRIOS!
-'''
 
 def enviar_mensagem_individual(conexao):
     print(f"[ENVIANDO] Enviando mensagens para {conexao['addr']}")
@@ -176,6 +172,8 @@ def handle_clientes(conn, addr):
                         conn.send(f'SISTEMA=Entrou em {nome_grupo}'.encode())
 
                         print( f'[GRUPO] {nome} entrou em {nome_grupo}')
+                    else:
+                        conn.send(f'SISTEMA=Você já está no grupo {nome_grupo}'.encode())
 
             # Enviar mensagem grupo
             elif msg.startswith('grupo_msg='):

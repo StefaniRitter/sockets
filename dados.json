@@ -1,7 +1,7 @@
 {
     "usuarios": {
         "nella": {
-            "status": "offline"
+            "status": "online"
         },
         "ste": {
             "status": "offline"
@@ -18,7 +18,8 @@
         ],
         "trabalho": [
             "nella",
-            "vick"
+            "vick",
+            "ste"
         ]
     }
 }

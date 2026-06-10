@@ -1,7 +1,7 @@
 import socket, threading
 
 SERVER = '127.0.0.1'
-PORT = 50005
+PORT = 50006
 
 client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 client.connect((SERVER, PORT))
