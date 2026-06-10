@@ -21,6 +21,7 @@ lock_arquivo = threading.Lock()
 
 # Servidor com ipv4 e protocolo TCP 
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
 s.bind((HOST, PORT))
 
 # Funcões auxiliares para persistência de dados
@@ -249,10 +250,16 @@ def start():
     carregar_dados()
     s.listen()
 
-    while True:
-        conn, addr = s.accept()
-        thread = threading.Thread(target=handle_cliente, args=(conn, addr), daemon=True)
-        thread.start()
+    try:
+        while True:
+            conn, addr = s.accept()
+            thread = threading.Thread(target=handle_cliente, args=(conn, addr), daemon=True)
+            thread.start()
+    except KeyboardInterrupt:
+        print("\n[SERVIDOR] Encerrando...")
+    finally:
+        s.close()  # garante que o socket fecha mesmo se der erro
+        print("[SERVIDOR] Socket fechado.")
 
 if __name__ == '__main__':
     start()
