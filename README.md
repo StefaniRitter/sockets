@@ -1,143 +1,138 @@
 # Aplicação para troca de mensagens com sockets
 
 ## Visão Geral
+Esta aplicação implementa um sistema de chat baseado em TCP utilizando Python e Threads. O servidor permite:
 
-Este projeto foi desenvolvido como parte da disciplina de Redes de Computadores, da Universidade Federal de Rio Grande (FURG), e se trata de um serviço de troca de mensagens, com a possibilidade de criação de múltiplos usuários, grupos e usuários por grupo.
-Para isso, esta aplicação utiliza sockets e threads, implementados com a linguagem python.
+- Comunicação geral entre todos os usuários conectados.
+- Criação de grupos de conversa.
+- Entrada e saída de grupos.
+- Mensagens privadas entre usuários.
+- Persistência dos grupos em arquivo JSON.
+- Controle de usuários online em tempo real.
 
-## Passo a Passo para a Execução em Ambiente WSL/Linux
+## Arquiteura
+#### Servidor
+- Utiliza sockets TCP.
+- Aceita múltiplos clientes simultaneamente.
+- Cria uma Thread para cada conexão.
+- Utiliza Locks para evitar condições de corrida.
+- Mantém usuários online em memória.
+- Salva grupos em arquivo JSON.
 
-### 1. Clonar o repositório
+#### Cliente
+Thread principal:
+- Recebe comandos digitados pelo usuário.
+
+Thread secundária:
+- Escuta mensagens recebidas do servidor.
+
+## Estrutura dos arquivos
 ```bash
-git clone https://github.com/StefaniRitter/sockets.git
+Projeto/ 
+│ 
+├── server.py       # Recebe conexões, gerencia usuários, grupos e mensagens
+├── client.py       # Client do chat utilizado pelos usários para conectar ao servidor
+└── dados.json      # Arquivo para armazenar os grupos criados
 ```
 
-### 2. Acessar a pasta do projeto
+## Requisitos
+- Python 3.10 ou superior
+- Sistema Operacional Windows, Linux ou macOS
+- Biblioteca padrão do Python (não requer instalação de pacotes externos)
+
+
+## Executando o servidor
+Abra um terminal na pasta do projeto e execute:
 ```bash
-cd sockets
+python server.py
 ```
 
-### 3. Instalar Python, se necessário
+Ao iniciar corretamente será exibida a mensagem:
 ```bash
-sudo apt update
-sudo apt install python3-pip python3-dev -y
+Servidor iniciado, aguardando conexões...
 ```
 
-### 4. Em um terminal, executar o servidor e manter o terminal aberto
+O servidor ficará escutando na porta:
 ```bash
-python3 server.py
+50005
 ```
-Saída esperada:
-```
-[INICIANDO] Iniciando socket...
-```
-
-### 5. Em um segundo terminal, executar o cliente
+em todas as interfaces de rede:
 ```bash
-python3 client.py
-```
-Saída esperada:
-```
-Digite seu nome:
+HOST = '0.0.0.0'
 ```
 
-### 6. Para testar a troca de mensagens entre dois usuários, basta abrir um terceiro terminal, executando a criação de outro cliente
+## Executando os Clientes
+### Opção 1 – Servidor e Cliente no Mesmo Computador
+Se o servidor e os clientes estiverem no mesmo computador, mantenha no arquivo client.py:
 ```bash
-python3 client.py
-```
-Saída esperada:
-```
-Digite seu nome:
+SERVER = '127.0.0.1'
+PORT = 50005
 ```
 
-### 7. Depois disso, basta escrever as mensagens desejadas em cada terminal para mandar para o outro terminal. Enquanto isso, o servidor vai exibir um log com as conexões e envios de mensagem.
-
-
-A imagem abaixo mostra 4 terminais diferentes, onde o primeiro é o servidor, e os outros 3 são clientes. O objetivo dessa parte do programa é simular um grupo, onde toda e qualquer mensagem enviada vai para todos os clientes conectados no servidor, e quando um novo cliente faz uma conexão, ele recebe todas as mensagens enviadas anteriormente.
-
-<img width="1645" height="657" alt="image" src="https://github.com/user-attachments/assets/eff7e195-f7f3-45f2-b082-0c410ab990e4" />
-
-
-Resolver:
-
-* Faz sentido enviar as mensagens anteriores para os novos usuários?
-* Fechar conexão nas portas para evitar erros e threads fantasmas;
-* Criar funções para conversas privadas entre dois usuários;
-* Criar funções para múltiplos grupos;
-* Refatorar código e lógica.
-
-### Alterações: 
-* Validação de nome único no login
-* Tratamento de desconexão de usuários
-* Criação de grupos
-* Entrada em grupos
-* Saída de grupos
-* Envio de mensagens para grupos
-* Criador entra automaticamente no grupo criado
-* Mensagens de sistema e erro
-* Logs de conexão, grupos e desconexão
-* Uso de Lock para evitar problemas entre threads
-* Identificação visual de mensagens:
-    * [GERAL]
-    * [nomegrupo]
-
-### Comandos do terminal: 
-* Mensagem global: oi pessoal
-* Criar grupo: /criar nomegrupo
-* Entrar em grupo: /entrar nomegrupo
-* Sair grupo: /sair nomegrupo
-* Enviar mensagem em grupo: /grupo nomegrupo oi
-* Mensagem privada: /privado destinatario mensagem
-* Listar grupos: /grupos
-* Listar usuários online: /usuarios
-* Listar membros de um grupo: /membros nomegrupo
-
-### Falta fazer:
-* Mensagem privada ✅
-* Listar grupos ✅
-* Listar usuários online ✅
-* Listar membros de um grupo ✅
-* Persistência dos dados (usar JSON) ✅
-* Interface gráfica
-* Remover grupos vazios?
-* Melhorar tratamento de erros
-* Comando de ajuda ✅
-
-### Alterações:
-* Mensagem privada entre usuários conectados
-* Confirmação de envio para o remetente
-* Exibição da mensagem para o destinatário
-* Listar grupos 
-* Listar usuários online 
-* Listar membros de um grupo 
-* Comando de "ajuda" para exibir ao usuário todos os comandos disponíveis
-* Persistência de dados com JSON
-* Salvamento de usuários com status online/offline
-* Salvamento dos grupos criados e seus membros
-* Carregamento automático dos dados ao iniciar o servidor
-
-### Persistência de dados
-
-A aplicação utiliza um arquivo `dados.json` para armazenar informações que devem continuar disponíveis mesmo após o servidor ser encerrado.
-
-Atualmente, são salvos:
-
-* Usuários já registrados, com status `online` ou `offline`;
-* Grupos criados;
-* Membros de cada grupo.
-
-Ao iniciar o servidor, os dados são carregados automaticamente. Todos os usuários são definidos inicialmente como `offline`, pois conexões anteriores não permanecem válidas após reiniciar o servidor.
-
-## Interface Gráfica
-
-Além da versão em terminal, a aplicação também possui uma interface gráfica desenvolvida com a biblioteca Tkinter. A interface oferece uma tela de login para validação do nome do usuário e uma janela principal de chat para envio e recebimento de mensagens.
-
-A versão gráfica utiliza a mesma comunicação baseada em sockets da versão em terminal, mantendo compatibilidade com todas as funcionalidades implementadas no servidor. O objetivo é proporcionar uma experiência mais intuitiva e amigável ao usuário, sem alterar a lógica de comunicação da aplicação.
-
-Para executar a interface gráfica:
-
+Em outro terminal execute:
 ```bash
-python3 gui_client.py
+python client.py
+```
+Você poderá abrir vários clientes simultaneamente na mesma máquina.
 
-```md
-> A interface gráfica está em desenvolvimento e novas funcionalidades serão adicionadas gradualmente.
+
+### Opção 2 – Clientes em Computadores Diferentes
+Quando os clientes estiverem em computadores diferentes da máquina que hospeda o servidor, é necessário utilizar o endereço IP do computador servidor.
+
+#### Passo 1 – Descobrir o IP do Servidor
+No computador que executa o servidor:
+```bash
+ipconfig
+```
+
+Localize o endereço IPv4.
+Exemplo:
+```bash
+IPv4: 192.168.1.50
+```
+
+#### Passo 2 – Configurar o Cliente
+No arquivo client.py altere:
+```bash
+SERVER = '127.0.0.1'
+```
+para:
+```bash
+SERVER = '192.168.1.50'
+```
+(substituindo pelo IP real do servidor)
+
+
+#### Passo 3 – Configuração do Firewall
+Se o firewall do computador que executa o servidor estiver bloqueando as conexões, os clientes não conseguirão se conectar ao chat.
+Nesse caso, pode ser necessário liberar:
+
+- A conexão de entrada na porta 50005/TCP.
+- O executável python.exe nas regras do firewall.
+
+As configurações variam conforme o sistema operacional e o software de firewall utilizado.
+
+## Comandos disponíveis
+``` bash
+Mensagem normal                     # Envia uma mensagem para todos os usuários conectados.
+/criar <grupo>	                    # Cria um novo grupo.
+/entrar <grupo>	                    # Entra em um grupo existente.
+/sair_grupo <grupo>	                # Sai de um grupo.
+/grupo <grupo> <mensagem>	        # Envia uma mensagem para um grupo.
+/membros <grupo>	                # Lista os membros de um grupo.
+/privado <usuário> <mensagem>	    # Envia uma mensagem privada para um usuário.
+/grupos	                            # Lista todos os grupos disponíveis.
+/usuarios	                        # Lista os usuários online.
+/ajuda	                            # Exibe a lista de comandos.
+```
+
+## Encerramento
+Para desligar o servidor, feche o terminal onde o arquivo `server.py` está sendo executado. 
+- Todos os clientes conectados perderão a conexão e precisarão se reconectar após a reinicialização do servidor.
+
+## Uso da IA
+Durante o desenvolvimento deste projeto, ferramentas de Inteligência Artificial foram utilizadas como apoio ao aprendizado e à implementação da aplicação:
+- Esclarecimento de dúvidas sobre sockets TCP.
+- Revisão e análise do código desenvolvido.
+- Sugestões de melhorias na organização e estrutura do sistema.
+- Apoio na identificação e correção de erros.
