@@ -1,10 +1,10 @@
 {
     "usuarios": {
         "nella": {
-            "status": "online"
+            "status": "offline"
         },
         "ste": {
-            "status": "offline"
+            "status": "online"
         },
         "vick": {
             "status": "offline"
